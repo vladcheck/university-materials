@@ -159,7 +159,7 @@ def decode_text_huffman_bigrams(encoded_text: str, codes: dict[str, str]) -> str
 
 def main() -> None:
     filename = "./input.txt"
-    text: str = read_text_from_file(filename)
+    text: str = read_text_from_file(filename).lower().strip()
 
     # 8. Построить схему алфавитного кодирования для однобуквенных сочетаний методом Хаффмана
     alphabet: dict[str, int] = create_alphabet_with_frequencies(text)
@@ -188,11 +188,6 @@ def main() -> None:
         math.ceil(math.log2(len(alphabet))), avg_huffman_code_length
     )
 
-    print(f"Средняя длина кода Хаффмана (однобуквенные): {avg_huffman_code_length}")
-    print(
-        f"Эффективность сжатия Хаффмана (однобуквенные): {compression_efficiency_huffman}"
-    )
-
     # Вычисления для биграмм
     avg_huffman_bigram_code_length: float = calculate_average_code_length(
         huffman_bigram_codes, bigram_alphabet
@@ -201,9 +196,13 @@ def main() -> None:
         math.ceil(math.log2(len(bigram_alphabet))), avg_huffman_bigram_code_length
     )
 
+    print(f"Средняя длина кода Хаффмана (однобуквенные): {avg_huffman_code_length}")
+    print(
+        f"Эффективность сжатия Хаффмана (однобуквенные): {truncate(compression_efficiency_huffman)}"
+    )
     print(f"Средняя длина кода Хаффмана (биграммы): {avg_huffman_bigram_code_length}")
     print(
-        f"Эффективность сжатия Хаффмана (биграммы): {compression_efficiency_huffman_bigram}"
+        f"Эффективность сжатия Хаффмана (биграммы): {truncate(compression_efficiency_huffman_bigram)}"
     )
 
     # Кодирование и декодирование для однобуквенных кодов
