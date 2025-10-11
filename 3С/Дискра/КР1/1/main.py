@@ -1,7 +1,8 @@
 import csv
 import math
 from typing import Any, Literal
-import os  # Импортируем модуль os для работы с файловой системой
+import os
+from truncate import truncate
 
 
 def create_dist_folder() -> str:
@@ -31,12 +32,13 @@ DIST_PATH: str = (
 
 def read_text_from_file(filename) -> str:
     with open(filename, "r", encoding="utf-8") as file:
-        return file.read()
+        t: str = file.read().strip()
+        return t
 
 
 def create_alphabet_with_frequencies(text) -> dict[str, int]:
     alphabet: dict[str, int] = {}
-    for char in text:
+    for char in text.lower():
         if char in alphabet:
             alphabet[char] += 1
         else:
@@ -45,15 +47,23 @@ def create_alphabet_with_frequencies(text) -> dict[str, int]:
 
 
 def write_alphabet_to_csv(alphabet, csv_filename) -> None:
+    total_chars: int = sum(alphabet.values())  # Вычисляем общее количество символов
     with open(
         os.path.join(DIST_PATH, csv_filename), "w", newline="", encoding="utf-8"
     ) as csvfile:
-        fieldnames: list[str] = ["Символ", "Частота"]
+        fieldnames: list[str] = [
+            "Символ",
+            "Частота",
+            "Вероятность",
+        ]
         writer: csv.DictWriter[str] = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for char, freq in alphabet.items():
-            writer.writerow({"Символ": char, "Частота": freq})
+            probability: float = freq / total_chars
+            writer.writerow(
+                {"Символ": char, "Частота": float(freq), "Вероятность": (probability)}
+            )
 
 
 def calculate_entropy(alphabet) -> int:
@@ -152,16 +162,11 @@ def decode_text(encoded_text, codes) -> Any | Literal[""]:
 
 
 if __name__ == "__main__":
-    sample_text = """Это пример текста для задания на кодирование.
-Он содержит различные буквы, пробелы и знаки препинания.
-Мы проанализируем этот текст, чтобы вычислить энтропию, избыточность
-и создать код Шеннона-Фано для сжатия."""
-
-    with open("input.txt", "w", encoding="utf-8") as file:
-        file.write(sample_text)
-
-    filename: str = "input.txt"
+    filename: str = os.path.abspath("./input.txt")
     text: str = read_text_from_file(filename)
+
+    # Приводим весь текст к нижнему регистру один раз
+    text = text.lower()
 
     alphabet: dict[str, int] = create_alphabet_with_frequencies(text)
 
@@ -171,21 +176,20 @@ if __name__ == "__main__":
     uniform_code_length: int = calculate_uniform_code_length(alphabet)
     redundancy: float = calculate_redundancy(entropy, uniform_code_length)
 
-    print(f"Энтропия: {entropy}")
-    print(f"Uniform code length: {uniform_code_length}")
-    print(f"Redundancy: {redundancy}")
-
     shannon_fano_codes: dict[Any, str] | Any = shannon_fano(alphabet)
 
     write_codes_to_csv(shannon_fano_codes, "shannon_fano_codes.csv")
 
     avg_code_length: float = calculate_average_code_length(shannon_fano_codes, alphabet)
-    compression_efficiency = calculate_compression_efficiency(
+    compression_efficiency: float = calculate_compression_efficiency(
         uniform_code_length, avg_code_length
     )
 
-    print(f"Средняя длина кода: {avg_code_length}")
-    print(f"Эффективность сжатия: {compression_efficiency}")
+    print(f"Энтропия: {truncate(entropy)}")
+    print(f"Длина равномерного кода: {truncate(uniform_code_length)}")
+    print(f"Избыточность: {truncate(redundancy)}")
+    print(f"Средняя длина кода: {truncate(avg_code_length)}")
+    print(f"Эффективность сжатия: {truncate(compression_efficiency)}")
 
     encoded_text: Any | Literal[""] = encode_text(text, shannon_fano_codes)
     decoded_text: Any | Literal[""] = decode_text(encoded_text, shannon_fano_codes)
