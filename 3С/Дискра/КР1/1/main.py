@@ -10,13 +10,9 @@ def create_dist_folder() -> str:
     Создает папку bigram_dist в текущей директории и возвращает её абсолютный путь.
     """
     folder_name = "main_dist"
-    # os.path.join используется для корректного создания пути в разных ОС
-    # os.path.abspath возвращает абсолютный путь
     dist_path: str = os.path.abspath(folder_name)
 
-    # os.path.exists проверяет, существует ли папка
     if not os.path.exists(dist_path):
-        # os.makedirs создает папку, exist_ok=True предотвращает ошибку, если папка уже существует
         os.makedirs(dist_path, exist_ok=True)
         print(f"Папка {dist_path} создана.")
     else:
@@ -25,9 +21,7 @@ def create_dist_folder() -> str:
     return dist_path
 
 
-DIST_PATH: str = (
-    create_dist_folder()
-)  # Присваиваем абсолютный путь к папке переменной DIST_PATH
+DIST_PATH: str = create_dist_folder()
 
 
 def read_text_from_file(filename) -> str:
@@ -47,7 +41,7 @@ def create_alphabet_with_frequencies(text) -> dict[str, int]:
 
 
 def write_alphabet_to_csv(alphabet, csv_filename) -> None:
-    total_chars: int = sum(alphabet.values())  # Вычисляем общее количество символов
+    total_chars: int = sum(alphabet.values())
     with open(
         os.path.join(DIST_PATH, csv_filename), "w", newline="", encoding="utf-8"
     ) as csvfile:
@@ -82,7 +76,6 @@ def calculate_redundancy(entropy, uniform_code_length) -> float:
     return (uniform_code_length - entropy) / uniform_code_length
 
 
-# Recursive function to assign codes
 def assign_code(alphabet_list, code="") -> dict[Any, str] | Any:
     if len(alphabet_list) == 1:
         return {alphabet_list[0][0]: code}
@@ -108,9 +101,7 @@ def assign_code(alphabet_list, code="") -> dict[Any, str] | Any:
     return left_codes
 
 
-# Function to build Shannon-Fano codes
 def shannon_fano(alphabet) -> dict[Any, str] | Any:
-    # Sort the alphabet by frequency in descending order
     sorted_alphabet = sorted(alphabet.items(), key=lambda x: x[1], reverse=True)
     return assign_code(sorted_alphabet)
 
@@ -148,7 +139,6 @@ def encode_text(text, codes) -> Any | Literal[""]:
 
 
 def decode_text(encoded_text, codes) -> Any | Literal[""]:
-    # Invert the codes dictionary for decoding
     inverted_codes = {code: char for char, code in codes.items()}
     decoded_text: Literal[""] = ""
     code: Literal[""] = ""
@@ -165,7 +155,6 @@ if __name__ == "__main__":
     filename: str = os.path.abspath("./input.txt")
     text: str = read_text_from_file(filename)
 
-    # Приводим весь текст к нижнему регистру один раз
     text = text.lower()
 
     alphabet: dict[str, int] = create_alphabet_with_frequencies(text)
