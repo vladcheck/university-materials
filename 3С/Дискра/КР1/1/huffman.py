@@ -27,29 +27,22 @@ def huffman_tree(alphabet: dict[str, int]) -> dict[str, str]:
     """
     Строит дерево Хаффмана и возвращает словарь с кодами для каждого символа.
     """
-    # Создаем кучу из узлов (частота, символ)
     heap = [[freq, [char, ""]] for char, freq in alphabet.items()]
     heapq.heapify(heap)
 
-    # Пока в куче больше одного элемента, объединяем два узла с наименьшей частотой
     while len(heap) > 1:
-        # Извлекаем два узла с наименьшей частотой
         low = heapq.heappop(heap)
         high = heapq.heappop(heap)
 
-        # Присваиваем коды: 0 для левого, 1 для правого
         for pair in low[1:]:
             pair[1] = "0" + pair[1]
         for pair in high[1:]:
             pair[1] = "1" + pair[1]
 
-        # Создаем новый узел с частотой, равной сумме частот объединяемых узлов
         new_node = [low[0] + high[0]] + low[1:] + high[1:]
         heapq.heappush(heap, new_node)
 
-    # Извлекаем корень дерева (всю информацию о символах и их кодах)
     huffman_codes = heap[0][1:]
-    # Преобразуем в словарь {символ: код}
     return {char: code for char, code in huffman_codes}
 
 
@@ -72,7 +65,6 @@ def encode_text_huffman_single_chars(text: str, codes: dict[str, str]) -> str:
         if char in codes:
             encoded_text += codes[char]
         else:
-            # Если символ из текста не найден в словаре кодов, вызываем ошибку
             raise KeyError(f"Символ '{char}' не найден в словаре кодирования Хаффмана.")
     return encoded_text
 
@@ -82,7 +74,6 @@ def decode_text_huffman_single_chars(encoded_text: str, codes: dict[str, str]) -
     Декодирует текст, закодированный с помощью кодов Хаффмана для отдельных символов.
     Использует инвертированный словарь кодов для восстановления исходного текста.
     """
-    # Инвертируем словарь кодов: {код: символ}
     inverted_codes: dict[str, str] = {code: char for char, code in codes.items()}
 
     decoded_text: str = ""
@@ -108,21 +99,16 @@ def encode_text_huffman_bigrams(text: str, codes: dict[str, str]) -> str:
     Каждая биграмма заменяется соответствующим кодом из словаря 'codes'.
     """
     encoded_text: str = ""
-    # Проходим по тексту с шагом 2, чтобы получить биграммы
+
     for i in range(0, len(text) - 1, 2):
         bigram: str = text[i : i + 2]
-        # Убедимся, что биграмма существует в словаре кодов
         if bigram in codes:
             encoded_text += codes[bigram]
         else:
-            # Если биграмма из текста не найдена в словаре кодов, вызываем ошибку
-            # Это не должно происходить, если текст, используемый для кодирования,
-            # совпадает с текстом, использованным для построения алфавита биграмм и кодов.
             raise KeyError(
                 f"Биграмма '{bigram}' не найдена в словаре кодирования Хаффмана."
             )
 
-    # Если длина текста нечетная, последний символ не является частью биграммы.
     if len(text) % 2 == 1:
         last_char: str = text[-1]
         print(
@@ -137,7 +123,6 @@ def decode_text_huffman_bigrams(encoded_text: str, codes: dict[str, str]) -> str
     Декодирует текст, закодированный с помощью кодов Хаффмана для биграмм.
     Использует инвертированный словарь кодов для восстановления исходного текста.
     """
-    # Инвертируем словарь кодов: {код: биграмма}
     inverted_codes: dict[str, str] = {code: bigram for bigram, code in codes.items()}
 
     decoded_text: str = ""
@@ -180,7 +165,6 @@ def main() -> None:
     huffman_bigram_codes: dict[str, str] = huffman_tree(bigram_alphabet)
     write_huffman_codes_to_csv(huffman_bigram_codes, "huffman_bigram_codes.csv")
 
-    # Вычисления для однобуквенных кодов
     avg_huffman_code_length: float = calculate_average_code_length(
         huffman_codes, alphabet
     )
@@ -188,7 +172,6 @@ def main() -> None:
         math.ceil(math.log2(len(alphabet))), avg_huffman_code_length
     )
 
-    # Вычисления для биграмм
     avg_huffman_bigram_code_length: float = calculate_average_code_length(
         huffman_bigram_codes, bigram_alphabet
     )
@@ -205,7 +188,6 @@ def main() -> None:
         f"Эффективность сжатия Хаффмана (биграммы): {truncate(compression_efficiency_huffman_bigram)}"
     )
 
-    # Кодирование и декодирование для однобуквенных кодов
     try:
         encoded_huffman_text: str = encode_text_huffman_single_chars(
             text, huffman_codes
@@ -217,7 +199,6 @@ def main() -> None:
         print(f"Ошибка при кодировании/декодировании однобуквенных кодов: {e}")
         return
 
-    # Кодирование и декодирование для биграмм
     try:
         encoded_huffman_bigram_text: str = encode_text_huffman_bigrams(
             text, huffman_bigram_codes
@@ -229,7 +210,6 @@ def main() -> None:
         print(f"Ошибка при кодировании/декодировании биграмм: {e}")
         return
 
-    # Запись результатов в файлы в папку DIST_PATH
     with open(
         os.path.join(DIST_PATH, "encoded_huffman.txt"), "w", encoding="utf-8"
     ) as file:
