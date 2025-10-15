@@ -1,3 +1,4 @@
+from math import log2, ceil
 from typing import List, Tuple
 import random
 import os
@@ -235,23 +236,8 @@ def main() -> None:
     result_file_path: str = os.path.join(DIST_PATH, "hamming_results.txt")
     with open(result_file_path, "w", encoding="utf-8") as result_file:
 
-        # 1. Запросить размер таблицы (количество проверочных битов r)
-        r: int = ask_positive_int(
-            "Введите количество проверочных битов (r) для кода Хемминга: "
-        )
-
-        # 2. Запросить размер генерируемой комбинации (информационных битов k)
         k: int = ask_positive_int("Введите размер информационной комбинации (k): ")
-
-        # Проверяем корректность r и k до чтения/генерации
-        max_k_for_r = (2**r) - r - 1
-        if k > max_k_for_r:
-            print_and_write(
-                f"Ошибка: Для r={r} максимальное допустимое значение k составляет {max_k_for_r}.",
-                result_file,
-            )
-            print_and_write(f"Введенное k ({k}) слишком велико.", result_file)
-            return  # Выходим, если параметры некорректны
+        r: int = ceil(log2(k))
 
         print_and_write(f"Введенные значения r={r} и k={k} корректны.", result_file)
 
