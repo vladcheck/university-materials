@@ -123,8 +123,8 @@ def main() -> None:
         math.ceil(math.log2(len(bigram_alphabet))), avg_bigram_code_length
     )
 
-    print(f"Энтропия буквосочетаний: {truncate(bigram_entropy)}")
-    print(f"Средняя длина буквосочетаний: {truncate(avg_bigram_code_length)}")
+    print(f"Энтропия буквосочетаний: {truncate(bigram_entropy)} бит/с")
+    print(f"Средняя длина буквосочетаний: {math.ceil(avg_bigram_code_length)} бит")
     print(
         f"Эффективность сжатия буквосочетаний: {truncate(compression_efficiency_bigram)}"
     )
